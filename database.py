@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any
 import pandas as pd
 from datetime import datetime
 
-from config import DATABASE_PATH, LOCK_TIMEOUT_MINUTES
+from config import DATABASE_PATH
 
 
 @st.cache_resource
