@@ -173,6 +173,19 @@ class UIComponents:
                     value=server_data.get('gpu_accessories', ''),
                     help="例: NVIDIA RTX 4090, 追加メモリ32GB"
                 )
+                    "利用者名",
+                    value=server_data.get('user_name', '')
+                )
+                os = st.text_input(
+                    "OS",
+                    value=server_data.get('os', ''),
+                    help="例: Ubuntu 22.04, Windows Server 2022"
+                )
+                gpu_accessories = st.text_input(
+                    "GPU・付属品",
+                    value=server_data.get('gpu_accessories', ''),
+                    help="例: NVIDIA RTX 4090, 追加メモリ32GB"
+                )
 
             notes = st.text_area(
                 "備考",
