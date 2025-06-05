@@ -173,19 +173,6 @@ class UIComponents:
                     value=server_data.get('gpu_accessories', ''),
                     help="例: NVIDIA RTX 4090, 追加メモリ32GB"
                 )
-                    "利用者名",
-                    value=server_data.get('user_name', '')
-                )
-                os = st.text_input(
-                    "OS",
-                    value=server_data.get('os', ''),
-                    help="例: Ubuntu 22.04, Windows Server 2022"
-                )
-                gpu_accessories = st.text_input(
-                    "GPU・付属品",
-                    value=server_data.get('gpu_accessories', ''),
-                    help="例: NVIDIA RTX 4090, 追加メモリ32GB"
-                )
 
             notes = st.text_area(
                 "備考",
@@ -204,52 +191,6 @@ class UIComponents:
             with col2:
                 if edit_mode:
                     if st.form_submit_button("キャンセル", use_container_width=True):
-                        del st.session_state.edit_server_id
-                        st.session_state.navigation = "サーバ一覧"
-                        st.rerun()
-
-        return submitted, {
-            'model': model,
-            'location': location,
-            'purchase_date': purchase_date.strftime('%Y-%m-%d') if purchase_date else '',
-            'warranty_status': warranty_status,
-            'ip_address': ip_address,
-            'user_name': user_name,
-            'os': os,
-            'gpu_accessories': gpu_accessories,
-            'notes': notes
-        }    "利用者名",
-                    value=server_data.get('user_name', '')
-                )
-                os = st.text_input(
-                    "OS",
-                    value=server_data.get('os', ''),
-                    help="例: Ubuntu 22.04, Windows Server 2022"
-                )
-                gpu_accessories = st.text_input(
-                    "GPU・付属品",
-                    value=server_data.get('gpu_accessories', ''),
-                    help="例: NVIDIA RTX 4090, 追加メモリ32GB"
-                )
-
-            notes = st.text_area(
-                "備考",
-                value=server_data.get('notes', ''),
-                help="その他の情報があれば記入してください"
-            )
-
-            col1, col2, col3 = st.columns([1, 1, 2])
-
-            with col1:
-                submitted = st.form_submit_button(
-                    "更新" if edit_mode else "追加",
-                    use_container_width=True
-                )
-
-            with col2:
-                if edit_mode:
-                    if st.form_submit_button("キャンセル", use_container_width=True):
-                        server_service.release_edit_lock(server_id, st.session_state.user_email)
                         del st.session_state.edit_server_id
                         st.session_state.navigation = "サーバ一覧"
                         st.rerun()
