@@ -9,9 +9,6 @@ DATABASE_PATH = "server_inventory.db"
 # 認証設定
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
-# 排他制御設定
-LOCK_TIMEOUT_MINUTES = 30
-
 # ページ設定
 PAGE_CONFIG = {
     "page_title": "サーバ在庫管理システム",

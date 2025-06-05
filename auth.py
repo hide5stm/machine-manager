@@ -13,7 +13,7 @@ from database import get_db_connection
 
 class AuthManager:
     """認証を管理するクラス"""
-    
+
     @staticmethod
     def verify_google_token(token: str) -> Optional[Dict[str, Any]]:
         """Google ID トークンの検証"""
@@ -24,7 +24,7 @@ class AuthManager:
             return idinfo
         except ValueError:
             return None
-    
+
     @staticmethod
     def login_user(user_info: Dict[str, Any]):
         """ユーザー情報の登録・更新とセッション設定"""
@@ -39,23 +39,23 @@ class AuthManager:
                 datetime.now()
             ))
             conn.commit()
-        
+
         st.session_state.user_email = user_info['email']
         st.session_state.user_name = user_info['name']
         st.session_state.user_picture = user_info.get('picture', '')
-    
+
     @staticmethod
     def logout_user():
         """ログアウト処理"""
         for key in ['user_email', 'user_name', 'user_picture']:
             if key in st.session_state:
                 del st.session_state[key]
-    
+
     @staticmethod
     def is_authenticated() -> bool:
         """認証状態の確認"""
         return 'user_email' in st.session_state
-    
+
     @staticmethod
     def get_current_user() -> Dict[str, str]:
         """現在のユーザー情報を取得"""

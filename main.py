@@ -14,22 +14,22 @@ def main():
     """メイン関数"""
     # ページ設定
     st.set_page_config(**PAGE_CONFIG)
-    
+
     # データベース初期化
     init_database()
-    
+
     # 認証チェック
     if not AuthManager.is_authenticated():
         UIComponents.render_login_form()
         return
-    
+
     # ページレンダラー初期化
     page_renderer = PageRenderer()
     ui_components = UIComponents()
-    
+
     # サイドバー表示
     page = ui_components.render_sidebar()
-    
+
     # ページ表示
     if page == "サーバ一覧":
         page_renderer.render_server_list()

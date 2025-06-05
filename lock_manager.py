@@ -1,74 +1,48 @@
 """
-排他制御管理モジュール
+楽観的ロック管理モジュール
 """
 from typing import Optional, Dict, Any
 from datetime import datetime
 
-from config import LOCK_TIMEOUT_MINUTES
 from database import get_db_connection
 
 
-class LockManager:
-    """排他制御を管理するクラス"""
-    
+class OptimisticLockManager:
+    """楽観的ロックを管理するクラス"""
+
     @staticmethod
-    def acquire_lock(server_id: int, user_email: str) -> bool:
-        """サーバ編集ロックの取得"""
+    def get_server_version(server_id: int) -> Optional[int]:
+        """サーバの現在のバージョンを取得"""
         with get_db_connection() as conn:
-            # 古いロックを削除
-            conn.execute('''
-                DELETE FROM edit_locks 
-                WHERE locked_at < datetime('now', '-{} minutes')
-            '''.format(LOCK_TIMEOUT_MINUTES))
-            
-            # 既存のロックを確認
-            existing_lock = conn.execute(
-                'SELECT locked_by FROM edit_locks WHERE server_id = ?',
+            result = conn.execute(
+                'SELECT version FROM servers WHERE id = ?',
                 (server_id,)
             ).fetchone()
-            
-            if existing_lock and existing_lock['locked_by'] != user_email:
-                return False
-            
-            # ロックを取得
-            conn.execute('''
-                INSERT OR REPLACE INTO edit_locks (server_id, locked_by, locked_at)
-                VALUES (?, ?, ?)
-            ''', (server_id, user_email, datetime.now()))
-            conn.commit()
-            return True
-    
+
+            return result['version'] if result else None
+
     @staticmethod
-    def release_lock(server_id: int, user_email: str):
-        """サーバ編集ロックの解除"""
-        with get_db_connection() as conn:
-            conn.execute('''
-                DELETE FROM edit_locks 
-                WHERE server_id = ? AND locked_by = ?
-            ''', (server_id, user_email))
-            conn.commit()
-    
+    def check_version_conflict(server_id: int, expected_version: int) -> bool:
+        """バージョン競合をチェック"""
+        current_version = OptimisticLockManager.get_server_version(server_id)
+        return current_version != expected_version
+
     @staticmethod
-    def get_lock_info(server_id: int) -> Optional[Dict[str, Any]]:
-        """ロック情報の取得"""
+    def get_conflict_info(server_id: int) -> Optional[Dict[str, Any]]:
+        """競合情報の取得"""
         with get_db_connection() as conn:
-            lock = conn.execute('''
-                SELECT el.locked_by, el.locked_at, u.name
-                FROM edit_locks el
-                LEFT JOIN users u ON el.locked_by = u.email
-                WHERE el.server_id = ? AND el.locked_at > datetime('now', '-{} minutes')
-            '''.format(LOCK_TIMEOUT_MINUTES), (server_id,)).fetchone()
-            
-            if lock:
+            result = conn.execute('''
+                SELECT s.updated_by, s.updated_at, u.name, s.version
+                FROM servers s
+                LEFT JOIN users u ON s.updated_by = u.email
+                WHERE s.id = ?
+            ''', (server_id,)).fetchone()
+
+            if result:
                 return {
-                    'locked_by': lock['locked_by'],
-                    'locked_at': lock['locked_at'],
-                    'user_name': lock['name'] or lock['locked_by']
+                    'updated_by': result['updated_by'],
+                    'updated_at': result['updated_at'],
+                    'user_name': result['name'] or result['updated_by'],
+                    'version': result['version']
                 }
-            return None
-    
-    @staticmethod
-    def is_locked_by_others(server_id: int, user_email: str) -> bool:
-        """他のユーザーによってロックされているかチェック"""
-        lock_info = LockManager.get_lock_info(server_id)
-        return lock_info is not None and lock_info['locked_by'] != user_email
+                return None
